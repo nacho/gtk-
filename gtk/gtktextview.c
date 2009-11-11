@@ -366,6 +366,8 @@ static void gtk_text_view_update_im_spot_location (GtkTextView *text_view);
 
 static GtkTextMark *gtk_text_view_get_insert      (GtkTextView *text_view);
 
+static GtkTextMark *gtk_text_view_get_selection_bound (GtkTextView *text_view);
+
 /* Container methods */
 static void gtk_text_view_add    (GtkContainer *container,
                                   GtkWidget    *child);
@@ -5910,7 +5912,7 @@ gtk_text_view_unselect (GtkTextView *text_view)
                                     gtk_text_view_get_insert (text_view));
 
   gtk_text_buffer_move_mark (get_buffer (text_view),
-                             gtk_text_buffer_get_selection_bound (get_buffer (text_view)),
+                             gtk_text_view_get_selection_bound (text_view),
                              &insert);
 }
 
@@ -6224,7 +6226,7 @@ gtk_text_view_start_selection_drag (GtkTextView       *text_view,
       GtkTextIter old_start, old_end;
 
       gtk_text_buffer_get_iter_at_mark (buffer, &old_ins, gtk_text_view_get_insert (text_view));
-      gtk_text_buffer_get_iter_at_mark (buffer, &old_bound, gtk_text_buffer_get_selection_bound (buffer));
+      gtk_text_buffer_get_iter_at_mark (buffer, &old_bound, gtk_text_view_get_selection_bound (text_view));
       old_start = old_ins;
       old_end = old_bound;
       gtk_text_iter_order (&old_start, &old_end);
@@ -7416,7 +7418,7 @@ gtk_text_view_mark_set_handler (GtkTextBuffer     *buffer,
       gtk_text_view_update_im_spot_location (text_view);
       need_reset = TRUE;
     }
-  else if (mark == gtk_text_buffer_get_selection_bound (buffer))
+  else if (mark == gtk_text_view_get_selection_bound (text_view))
     {
       need_reset = TRUE;
     }
@@ -9142,6 +9144,14 @@ gtk_text_view_get_insert (GtkTextView *text_view)
   g_return_val_if_fail (GTK_IS_TEXT_VIEW (text_view), NULL);
   
   return gtk_text_buffer_get_insert (get_buffer (text_view));
+}
+
+static GtkTextMark *
+gtk_text_view_get_selection_bound (GtkTextView *text_view)
+{
+  g_return_val_if_fail (GTK_IS_TEXT_VIEW (text_view), NULL);
+  
+  return gtk_text_buffer_get_selection_bound (get_buffer (text_view));
 }
 
 #define __GTK_TEXT_VIEW_C__
