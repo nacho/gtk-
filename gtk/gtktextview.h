@@ -90,6 +90,8 @@ struct _GtkTextView
   guint GSEAL (overwrite_mode) : 1;
   guint GSEAL (cursor_visible) : 1;
 
+  guint GSEAL (independent_cursor) : 1;
+
   /* if we have reset the IM since the last character entered */  
   guint GSEAL (need_im_reset) : 1;
 
@@ -244,6 +246,10 @@ void           gtk_text_view_set_cursor_visible    (GtkTextView   *text_view,
                                                     gboolean       setting);
 gboolean       gtk_text_view_get_cursor_visible    (GtkTextView   *text_view);
 
+void           gtk_text_view_set_independent_cursor (GtkTextView *text_view,
+                                                     gboolean     independent_cursor);
+GtkTextMark   *gtk_text_view_get_insert            (GtkTextView *text_view);
+GtkTextMark   *gtk_text_view_get_selection_bound   (GtkTextView *text_view);
 void           gtk_text_view_get_iter_location     (GtkTextView   *text_view,
                                                     const GtkTextIter *iter,
                                                     GdkRectangle  *location);
