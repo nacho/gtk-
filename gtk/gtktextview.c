@@ -9172,9 +9172,8 @@ gtk_text_view_set_independent_cursor (GtkTextView *text_view,
       gtk_text_buffer_get_iter_at_mark (get_buffer (text_view), &iter, mark);
       
       if (priv->insert == NULL)
-        /* FIXME: get an unique name */
         priv->insert = gtk_text_buffer_create_mark (get_buffer (text_view),
-                                                    "insert-view",
+                                                    NULL,
                                                     &iter,
                                                     FALSE);
       
@@ -9182,9 +9181,8 @@ gtk_text_view_set_independent_cursor (GtkTextView *text_view,
       gtk_text_buffer_get_iter_at_mark (get_buffer (text_view), &iter, mark);
       
       if (priv->selection_bound == NULL)
-        /* FIXME: get an unique name */
         priv->selection_bound = gtk_text_buffer_create_mark (get_buffer (text_view),
-                                                             "selection-bound-view",
+                                                             NULL,
                                                              &iter,
                                                              FALSE);
     }
