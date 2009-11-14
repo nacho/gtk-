@@ -91,6 +91,8 @@ struct _GtkTextView
   guint GSEAL (cursor_visible) : 1;
 
   guint GSEAL (independent_cursor) : 1;
+  GtkTextMark *GSEAL (insert);
+  GtkTextMark *GSEAL (selection_bound);
 
   /* if we have reset the IM since the last character entered */  
   guint GSEAL (need_im_reset) : 1;

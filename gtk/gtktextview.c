@@ -109,9 +109,6 @@ struct _GtkTextViewPrivate
   guint blink_time;  /* time in msec the cursor has blinked since last user event */
   guint im_spot_idle;
   gchar *im_module;
-
-  GtkTextMark *insert;
-  GtkTextMark *selection_bound;
 };
 
 
@@ -367,6 +364,11 @@ static void     gtk_text_view_invalidate           (GtkTextView *text_view);
 static void     gtk_text_view_flush_first_validate (GtkTextView *text_view);
 
 static void gtk_text_view_update_im_spot_location (GtkTextView *text_view);
+
+static void move_mark                             (GtkTextView       *text_view,
+                                                   GtkTextMark       *mark,
+                                                   const gchar       *mark_name,
+                                                   const GtkTextIter *where);
 
 /* Container methods */
 static void gtk_text_view_add    (GtkContainer *container,
@@ -1290,6 +1292,9 @@ gtk_text_view_init (GtkTextView *text_view)
   text_view->indent = 0;
   text_view->tabs = NULL;
   text_view->editable = TRUE;
+  text_view->independent_cursor = 0;
+  text_view->insert = NULL;
+  text_view->selection_bound = NULL;
 
   gtk_drag_dest_set (widget, 0, NULL, 0,
                      GDK_ACTION_COPY | GDK_ACTION_MOVE);
@@ -5034,9 +5039,10 @@ move_cursor (GtkTextView       *text_view,
              gboolean           extend_selection)
 {
   if (extend_selection)
-    gtk_text_buffer_move_mark (get_buffer (text_view),
-                               gtk_text_view_get_insert (text_view),
-                               new_location);
+    move_mark (text_view,
+               gtk_text_view_get_insert (text_view),
+               "insert",
+               new_location);
   else
       gtk_text_buffer_place_cursor (get_buffer (text_view),
 				    new_location);
@@ -5927,9 +5933,10 @@ gtk_text_view_unselect (GtkTextView *text_view)
   gtk_text_buffer_get_iter_at_mark (get_buffer (text_view), &insert,
                                     gtk_text_view_get_insert (text_view));
 
-  gtk_text_buffer_move_mark (get_buffer (text_view),
-                             gtk_text_view_get_selection_bound (text_view),
-                             &insert);
+  move_mark (text_view,
+             gtk_text_view_get_selection_bound (text_view),
+             "selection_bound",
+             &insert);
 }
 
 static void
@@ -7585,9 +7592,10 @@ gtk_text_view_select_all (GtkWidget *widget,
     {
       gtk_text_buffer_get_iter_at_mark (buffer, &insert,
 					gtk_text_view_get_insert (text_view));
-      gtk_text_buffer_move_mark (buffer,
-                                 gtk_text_view_get_selection_bound (text_view),
-                                 &insert);
+      move_mark (text_view,
+                 gtk_text_view_get_selection_bound (text_view),
+                 "selection_bound",
+                 &insert);
     }
 }
 
@@ -9155,11 +9163,7 @@ void
 gtk_text_view_set_independent_cursor (GtkTextView *text_view,
                                       gboolean     independent_cursor)
 {
-  GtkTextViewPrivate *priv;
-
   g_return_if_fail (GTK_IS_TEXT_VIEW (text_view));
-  
-  priv = GTK_TEXT_VIEW_GET_PRIVATE (text_view);
   
   text_view->independent_cursor = independent_cursor;
   
@@ -9171,37 +9175,76 @@ gtk_text_view_set_independent_cursor (GtkTextView *text_view,
       mark = gtk_text_buffer_get_insert (get_buffer (text_view));
       gtk_text_buffer_get_iter_at_mark (get_buffer (text_view), &iter, mark);
       
-      if (priv->insert == NULL)
-        priv->insert = gtk_text_buffer_create_mark (get_buffer (text_view),
-                                                    NULL,
-                                                    &iter,
-                                                    FALSE);
-      
+      if (text_view->insert == NULL)
+        text_view->insert = gtk_text_buffer_create_mark (get_buffer (text_view),
+                                                         NULL,
+                                                         &iter,
+                                                         FALSE);
+
       mark = gtk_text_buffer_get_selection_bound (get_buffer (text_view));
       gtk_text_buffer_get_iter_at_mark (get_buffer (text_view), &iter, mark);
       
-      if (priv->selection_bound == NULL)
-        priv->selection_bound = gtk_text_buffer_create_mark (get_buffer (text_view),
-                                                             NULL,
-                                                             &iter,
-                                                             FALSE);
+      if (text_view->selection_bound == NULL)
+        text_view->selection_bound = gtk_text_buffer_create_mark (get_buffer (text_view),
+                                                                  NULL,
+                                                                  &iter,
+                                                                  FALSE);
     }
   else
     {
-      if (priv->insert != NULL)
+      if (text_view->insert != NULL)
         {
           gtk_text_buffer_delete_mark (get_buffer (text_view),
-                                       priv->insert);
-          priv->insert = NULL;
+                                       text_view->insert);
+          text_view->insert = NULL;
         }
       
-      if (priv->selection_bound != NULL)
+      if (text_view->selection_bound != NULL)
         {
           gtk_text_buffer_delete_mark (get_buffer (text_view),
-                                       priv->selection_bound);
-          priv->selection_bound = NULL;
+                                       text_view->selection_bound);
+          text_view->selection_bound = NULL;
         }
     }
+}
+
+static void
+sync_mark (GtkTextView *text_view,
+           GtkTextMark *mark,
+           const gchar *mark_name)
+{
+  GtkTextIter iter;
+  GtkTextMark *sync_mark;
+  
+  sync_mark = gtk_text_buffer_get_mark (get_buffer (text_view),
+                                        mark_name);
+  
+  if (mark == sync_mark)
+    return;
+  
+  gtk_text_buffer_get_iter_at_mark (get_buffer (text_view), &iter,
+                                    mark);
+
+  g_signal_handlers_block_by_func (get_buffer (text_view),
+                                   gtk_text_view_mark_set_handler,
+                                   text_view);
+  gtk_text_buffer_move_mark (get_buffer (text_view),
+                             sync_mark,
+                             &iter);
+  g_signal_handlers_unblock_by_func (get_buffer (text_view),
+                                     gtk_text_view_mark_set_handler,
+                                     text_view);
+}
+
+static void
+move_mark (GtkTextView       *text_view,
+           GtkTextMark       *mark,
+           const gchar       *mark_name,
+           const GtkTextIter *where)
+{
+  gtk_text_buffer_move_mark (get_buffer (text_view), mark, where);
+  
+  sync_mark (text_view, mark, mark_name);
 }
 
 GtkTextMark *
@@ -9209,11 +9252,11 @@ gtk_text_view_get_insert (GtkTextView *text_view)
 {
   g_return_val_if_fail (GTK_IS_TEXT_VIEW (text_view), NULL);
 
-  if (text_view->independent_cursor)
+  if (text_view->independent_cursor && text_view->insert != NULL)
     {
-      GtkTextViewPrivate *priv = GTK_TEXT_VIEW_GET_PRIVATE (text_view);
-    
-      return priv->insert;
+      sync_mark (text_view, text_view->insert, "insert");
+
+      return text_view->insert;
     }
   else
     return gtk_text_buffer_get_insert (get_buffer (text_view));
@@ -9224,11 +9267,11 @@ gtk_text_view_get_selection_bound (GtkTextView *text_view)
 {
   g_return_val_if_fail (GTK_IS_TEXT_VIEW (text_view), NULL);
 
-  if (text_view->independent_cursor)
+  if (text_view->independent_cursor && text_view->selection_bound != NULL)
     {
-      GtkTextViewPrivate *priv = GTK_TEXT_VIEW_GET_PRIVATE (text_view);
-      
-      return priv->selection_bound;
+      sync_mark (text_view, text_view->selection_bound, "selection_bound");
+
+      return text_view->selection_bound;
     }
   else
     return gtk_text_buffer_get_selection_bound (get_buffer (text_view));
