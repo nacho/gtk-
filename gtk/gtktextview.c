@@ -9215,15 +9215,18 @@ sync_mark (GtkTextView *text_view,
 {
   GtkTextIter iter;
   GtkTextMark *sync_mark;
+  GtkTextIter sync_iter;
   
   sync_mark = gtk_text_buffer_get_mark (get_buffer (text_view),
                                         mark_name);
   
-  if (mark == sync_mark)
-    return;
-  
   gtk_text_buffer_get_iter_at_mark (get_buffer (text_view), &iter,
                                     mark);
+  gtk_text_buffer_get_iter_at_mark (get_buffer (text_view), &sync_iter,
+                                    sync_mark);
+
+  if (gtk_text_iter_equal (&iter, &sync_iter))
+    return;
 
   g_signal_handlers_block_by_func (get_buffer (text_view),
                                    gtk_text_view_mark_set_handler,
