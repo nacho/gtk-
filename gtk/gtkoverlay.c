@@ -275,13 +275,12 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
 
       gtk_widget_get_preferred_size (child, NULL, &req);
       offset = gtk_overlay_child_get_offset (GTK_OVERLAY_CHILD (child));
-      halign = gtk_widget_get_halign (child);
-      valign = gtk_widget_get_valign (child);
+      halign = gtk_widget_get_halign (container->original);
+      valign = gtk_widget_get_valign (container->original);
 
       /* FIXME: Add all the positions here */
       switch (halign)
         {
-          /* The gravity is treated as position and not as a gravity */
           case GTK_ALIGN_END:
             switch (valign)
               {
