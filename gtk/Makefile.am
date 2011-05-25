@@ -257,7 +257,6 @@ gtk_public_h_sources = 		\
 	gtkoffscreenwindow.h	\
 	gtkorientable.h		\
 	gtkoverlay.h		\
-	gtkoverlaychild.h	\
 	gtkpagesetup.h		\
 	gtkpaned.h		\
 	gtkpapersize.h		\
@@ -590,7 +589,6 @@ gtk_base_c_sources = 		\
 	gtkoffscreenwindow.c	\
 	gtkorientable.c		\
 	gtkoverlay.c		\
-	gtkoverlaychild.c	\
 	gtkpagesetup.c		\
 	gtkpaned.c		\
 	gtkpango.c		\

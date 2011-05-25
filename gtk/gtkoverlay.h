@@ -28,7 +28,6 @@
 #define __GTK_OVERLAY_H__
 
 #include <gtk/gtkcontainer.h>
-#include "gtkoverlaychild.h"
 
 G_BEGIN_DECLS
 
@@ -43,6 +42,7 @@ G_BEGIN_DECLS
 typedef struct _GtkOverlay         GtkOverlay;
 typedef struct _GtkOverlayClass    GtkOverlayClass;
 typedef struct _GtkOverlayPrivate  GtkOverlayPrivate;
+typedef struct _GtkOverlayChild    GtkOverlayChild;
 
 struct _GtkOverlay
 {
@@ -65,6 +65,12 @@ struct _GtkOverlayClass
   void (*_gtk_reserved7) (void);
   void (*_gtk_reserved8) (void);
   void (*_gtk_reserved9) (void);
+};
+
+struct _GtkOverlayChild
+{
+  GtkWidget *widget;
+  gint offset;
 };
 
 GType       gtk_overlay_get_type    (void) G_GNUC_CONST;
