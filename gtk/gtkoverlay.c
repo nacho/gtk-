@@ -174,41 +174,6 @@ gtk_overlay_set_property (GObject      *object,
 }
 
 static void
-gtk_overlay_realize (GtkWidget *widget)
-{
-  GtkAllocation allocation;
-  GdkWindow *window;
-  GdkWindowAttr attributes;
-  gint attributes_mask;
-  GtkStyleContext *context;
-
-  gtk_widget_set_realized (widget, TRUE);
-
-  gtk_widget_get_allocation (widget, &allocation);
-
-  attributes.window_type = GDK_WINDOW_CHILD;
-  attributes.x = allocation.x;
-  attributes.y = allocation.y;
-  attributes.width = allocation.width;
-  attributes.height = allocation.height;
-  attributes.wclass = GDK_INPUT_OUTPUT;
-  attributes.visual = gtk_widget_get_visual (widget);
-  attributes.event_mask = gtk_widget_get_events (widget);
-  attributes.event_mask |= GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK;
-
-  attributes_mask = GDK_WA_X | GDK_WA_Y;
-
-  window = gdk_window_new (gtk_widget_get_parent_window (widget),
-                           &attributes, attributes_mask);
-  gtk_widget_set_window (widget, window);
-  gdk_window_set_user_data (window, widget);
-
-  context = gtk_widget_get_style_context (widget);
-  gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
-  gtk_style_context_set_background (context, window);
-}
-
-static void
 gtk_overlay_get_preferred_width (GtkWidget *widget,
                                  gint      *minimum,
                                  gint      *natural)
@@ -439,7 +404,6 @@ gtk_overlay_class_init (GtkOverlayClass *klass)
   object_class->get_property = gtk_overlay_get_property;
   object_class->set_property = gtk_overlay_set_property;
 
-  widget_class->realize = gtk_overlay_realize;
   widget_class->get_preferred_width = gtk_overlay_get_preferred_width;
   widget_class->get_preferred_height = gtk_overlay_get_preferred_height;
   widget_class->size_allocate = gtk_overlay_size_allocate;
@@ -474,7 +438,7 @@ gtk_overlay_init (GtkOverlay *overlay)
 {
   overlay->priv = G_TYPE_INSTANCE_GET_PRIVATE (overlay, GTK_TYPE_OVERLAY, GtkOverlayPrivate);
 
-  gtk_widget_set_app_paintable (GTK_WIDGET (overlay), TRUE);
+  gtk_widget_set_has_window (GTK_WIDGET (overlay), FALSE);
 }
 
 /**
