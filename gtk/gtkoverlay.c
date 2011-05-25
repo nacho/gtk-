@@ -49,6 +49,23 @@ enum
 
 G_DEFINE_TYPE (GtkOverlay, gtk_overlay, GTK_TYPE_CONTAINER)
 
+/* the reason for this is that the main widget doesn't need to set an offset
+   and it doesn't need an extra window */
+static void
+add_child (GtkOverlay *overlay,
+           GtkWidget  *widget)
+{
+  GtkOverlayPrivate *priv = overlay->priv;
+  GtkOverlayChild *child;
+
+  child = g_slice_new0 (GtkOverlayChild);
+  child->widget = widget;
+
+  gtk_widget_set_parent (widget, GTK_WIDGET (overlay));
+
+  priv->children = g_slist_append (priv->children, child);
+}
+
 static GtkOverlayChild *
 get_child (GtkOverlay *overlay,
            GtkWidget  *widget)
@@ -66,6 +83,37 @@ get_child (GtkOverlay *overlay,
     }
 
   return NULL;
+}
+
+static GdkWindow *
+gtk_overlay_create_child_window (GtkOverlay *overlay,
+                                 GtkWidget  *child)
+{
+  GtkWidget *widget = GTK_WIDGET (overlay);
+  GtkAllocation allocation;
+  GdkWindow *window;
+  GdkWindowAttr attributes;
+  gint attributes_mask;
+
+  gtk_widget_get_allocation (child, &allocation);
+
+  attributes.window_type = GDK_WINDOW_CHILD;
+  attributes.wclass = GDK_INPUT_OUTPUT;
+  attributes.width = allocation.width;
+  attributes.height = allocation.height;
+  attributes.x = allocation.x;
+  attributes.y = allocation.y;
+  attributes_mask = GDK_WA_X | GDK_WA_Y;
+  attributes.event_mask = gtk_widget_get_events (widget) | GDK_EXPOSURE_MASK;
+
+  window = gdk_window_new (gtk_widget_get_window (widget),
+                           &attributes, attributes_mask);
+  gdk_window_set_user_data (window, overlay);
+  gtk_style_context_set_background (gtk_widget_get_style_context (widget), window);
+
+  gtk_widget_set_parent_window (child, window);
+
+  return window;
 }
 
 static void
@@ -110,7 +158,7 @@ gtk_overlay_set_property (GObject      *object,
     {
       case PROP_MAIN_WIDGET:
         priv->main_widget = g_value_get_object (value);
-        gtk_overlay_add (overlay, priv->main_widget, 0);
+        add_child (overlay, priv->main_widget);
         break;
       case PROP_RELATIVE_WIDGET:
         priv->relative_widget = g_value_get_object (value);
@@ -150,8 +198,22 @@ gtk_overlay_get_preferred_height (GtkWidget *widget,
 }
 
 static void
+gtk_overlay_child_allocate (GtkWidget           *child,
+                            GdkWindow           *child_window, /* can be NULL */
+                            const GtkAllocation *window_allocation,
+                            GtkAllocation       *child_allocation)
+{
+  if (child_window)
+    gdk_window_move_resize (child_window,
+                            window_allocation->x, window_allocation->y,
+                            window_allocation->width, window_allocation->height);
+
+  gtk_widget_size_allocate (child, child_allocation);
+}
+
+static void
 gtk_overlay_size_allocate (GtkWidget     *widget,
-                             GtkAllocation *allocation)
+                           GtkAllocation *allocation)
 {
   GtkOverlay *overlay = GTK_OVERLAY (widget);
   GtkOverlayPrivate *priv = overlay->priv;
@@ -176,13 +238,14 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
   for (children = priv->children; children; children = g_slist_next (children))
     {
       GtkRequisition req;
-      GtkAllocation alloc;
+      GtkAllocation alloc, child_alloc;
       guint offset;
       GtkAlign halign, valign;
 
       child = children->data;
 
-      if (child->widget == priv->main_widget)
+      if (child->widget == priv->main_widget ||
+          !gtk_widget_get_visible (child->widget))
         continue;
 
       gtk_widget_get_preferred_size (child->widget, NULL, &req);
@@ -237,8 +300,101 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
       alloc.width = MIN (main_alloc.width, req.width);
       alloc.height = MIN (main_alloc.height, req.height);
 
-      gtk_widget_size_allocate (child->widget, &alloc);
+      child_alloc.x = child_alloc.y = 0;
+      child_alloc.width = alloc.width;
+      child_alloc.height = alloc.height;
+
+      gtk_overlay_child_allocate (child->widget, child->window, &alloc, &child_alloc);
     }
+}
+
+static void
+gtk_overlay_realize (GtkWidget *widget)
+{
+  GtkOverlay *overlay = GTK_OVERLAY (widget);
+  GtkOverlayPrivate *priv = overlay->priv;
+  GtkOverlayChild *child;
+  GSList *children;
+
+  GTK_WIDGET_CLASS (gtk_overlay_parent_class)->realize (widget);
+
+  for (children = priv->children; children; children = g_slist_next (children))
+    {
+      child = children->data;
+
+      if (child->widget == priv->main_widget)
+        {
+          child->window = gtk_widget_get_window (priv->main_widget);
+        }
+      else if (child->window == NULL)
+        {
+          child->window = gtk_overlay_create_child_window (overlay, child->widget);
+        }
+    }
+}
+
+static void
+gtk_overlay_unrealize (GtkWidget *widget)
+{
+  GtkOverlay *overlay = GTK_OVERLAY (widget);
+  GtkOverlayPrivate *priv = overlay->priv;
+  GtkOverlayChild *child;
+  GSList *children;
+
+  for (children = priv->children; children; children = g_slist_next (children))
+    {
+      child = children->data;
+
+      if (child->widget == priv->main_widget)
+        child->window = NULL;
+      else
+        {
+          gtk_widget_set_parent_window (child->widget, NULL);
+          gdk_window_set_user_data (child->window, NULL);
+          gdk_window_destroy (child->window);
+          child->window = NULL;
+        }
+    }
+
+  GTK_WIDGET_CLASS (gtk_overlay_parent_class)->unrealize (widget);
+}
+
+static void
+gtk_overlay_map (GtkWidget *widget)
+{
+  GtkOverlay *overlay = GTK_OVERLAY (widget);
+  GtkOverlayPrivate *priv = overlay->priv;
+  GtkOverlayChild *child;
+  GSList *children;
+
+  GTK_WIDGET_CLASS (gtk_overlay_parent_class)->map (widget);
+
+  for (children = priv->children; children; children = g_slist_next (children))
+    {
+      child = children->data;
+
+      if (child->window != NULL && gtk_widget_get_visible (child->widget) && gtk_widget_get_child_visible (child->widget))
+        gdk_window_show (child->window);
+    }
+}
+
+static void
+gtk_overlay_unmap (GtkWidget *widget)
+{
+  GtkOverlay *overlay = GTK_OVERLAY (widget);
+  GtkOverlayPrivate *priv = overlay->priv;
+  GtkOverlayChild *child;
+  GSList *children;
+
+  for (children = priv->children; children; children = g_slist_next (children))
+    {
+      child = children->data;
+
+      if (child->window != NULL && gdk_window_is_visible (child->window))
+        gdk_window_hide (child->window);
+    }
+
+  GTK_WIDGET_CLASS (gtk_overlay_parent_class)->unmap (widget);
 }
 
 static void
@@ -383,6 +539,10 @@ gtk_overlay_class_init (GtkOverlayClass *klass)
   widget_class->get_preferred_width = gtk_overlay_get_preferred_width;
   widget_class->get_preferred_height = gtk_overlay_get_preferred_height;
   widget_class->size_allocate = gtk_overlay_size_allocate;
+  widget_class->realize = gtk_overlay_realize;
+  widget_class->unrealize = gtk_overlay_unrealize;
+  widget_class->map = gtk_overlay_map;
+  widget_class->unmap = gtk_overlay_unmap;
 
   container_class->add = overlay_add;
   container_class->remove = gtk_overlay_remove;
@@ -463,19 +623,18 @@ gtk_overlay_add (GtkOverlay *overlay,
                  GtkWidget  *widget,
                  guint       offset)
 {
-  GtkOverlayPrivate *priv = overlay->priv;
   GtkOverlayChild *child;
 
   g_return_if_fail (GTK_IS_OVERLAY (overlay));
   g_return_if_fail (GTK_IS_WIDGET (widget));
 
-  child = g_slice_new (GtkOverlayChild);
-  child->widget = widget;
+  add_child (overlay, widget);
+
+  child = get_child (overlay, widget);
   child->offset = offset;
 
-  gtk_widget_set_parent (widget, GTK_WIDGET (overlay));
-
-  priv->children = g_slist_append (priv->children, child);
+  if (gtk_widget_get_realized (GTK_WIDGET (overlay)))
+    child->window = gtk_overlay_create_child_window (overlay, widget);
 }
 
 void

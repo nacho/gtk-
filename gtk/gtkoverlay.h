@@ -70,6 +70,7 @@ struct _GtkOverlayClass
 struct _GtkOverlayChild
 {
   GtkWidget *widget;
+  GdkWindow *window;
   gint offset;
 };
 
