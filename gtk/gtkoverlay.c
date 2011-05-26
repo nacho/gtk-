@@ -448,7 +448,7 @@ static void
 overlay_add (GtkContainer *overlay,
              GtkWidget    *widget)
 {
-  gtk_overlay_add (GTK_OVERLAY (overlay), widget, 0, 0);
+  gtk_overlay_add (GTK_OVERLAY (overlay), widget);
 }
 
 static void
@@ -731,16 +731,12 @@ gtk_overlay_get_relative_widget (GtkOverlay *overlay)
  * gtk_overlay_add:
  * @overlay: a #GtkOverlay
  * @widget: a #GtkWidget to be added to the container
- * @x_offset: x offset for @widget
- * @y_offset: y offset for @widget
  *
- * Adds @widget to @overlay in a specific position.
+ * Adds @widget to @overlay.
  */
 void
 gtk_overlay_add (GtkOverlay *overlay,
-                 GtkWidget  *widget,
-                 gint        x_offset,
-                 gint        y_offset)
+                 GtkWidget  *widget)
 {
   GtkOverlayChild *child;
 
@@ -750,8 +746,6 @@ gtk_overlay_add (GtkOverlay *overlay,
   add_child (overlay, widget);
 
   child = get_child (overlay, widget);
-  child->x_offset = x_offset;
-  child->y_offset = y_offset;
 
   if (gtk_widget_get_realized (GTK_WIDGET (overlay)))
     child->window = gtk_overlay_create_child_window (overlay, widget);

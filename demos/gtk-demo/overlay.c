@@ -43,44 +43,48 @@ do_overlay (GtkWidget *do_widget)
       gtk_container_add (GTK_CONTAINER (window), overlay);
 
       entry = gtk_entry_new ();
-      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
+      gtk_overlay_add (GTK_OVERLAY (overlay), entry);
       gtk_widget_set_halign (entry, GTK_ALIGN_END);
       gtk_widget_set_valign (entry, GTK_ALIGN_END);
 
       label = gtk_label_new ("Hello world");
       gtk_widget_set_halign (label, GTK_ALIGN_END);
       gtk_widget_set_valign (label, GTK_ALIGN_END);
-      gtk_overlay_add (GTK_OVERLAY (overlay), label, -20, -5);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label);
+      gtk_overlay_set_offset (GTK_OVERLAY (overlay), label, -20, -5);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_START);
       gtk_widget_set_valign (entry, GTK_ALIGN_END);
-      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
+      gtk_overlay_add (GTK_OVERLAY (overlay), entry);
 
       label = gtk_label_new ("Hello world");
       gtk_widget_set_halign (label, GTK_ALIGN_START);
       gtk_widget_set_valign (label, GTK_ALIGN_END);
-      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, -5);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label);
+      gtk_overlay_set_offset (GTK_OVERLAY (overlay), label, 20, -5);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_END);
       gtk_widget_set_valign (entry, GTK_ALIGN_START);
-      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
+      gtk_overlay_add (GTK_OVERLAY (overlay), entry);
 
       label = gtk_label_new ("Hello world");
       gtk_widget_set_halign (label, GTK_ALIGN_END);
       gtk_widget_set_valign (label, GTK_ALIGN_START);
-      gtk_overlay_add (GTK_OVERLAY (overlay), label, -20, 5);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label);
+      gtk_overlay_set_offset (GTK_OVERLAY (overlay), label, -20, 5);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_START);
       gtk_widget_set_valign (entry, GTK_ALIGN_START);
-      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
+      gtk_overlay_add (GTK_OVERLAY (overlay), entry);
 
       label = gtk_label_new ("Hello world");
       gtk_widget_set_halign (label, GTK_ALIGN_START);
       gtk_widget_set_valign (label, GTK_ALIGN_START);
-      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, 5);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label);
+      gtk_overlay_set_offset (GTK_OVERLAY (overlay), label, 20, 5);
 
       gtk_widget_show_all (overlay);
     }

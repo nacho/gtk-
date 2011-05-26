@@ -76,9 +76,7 @@ void        gtk_overlay_set_relative_widget      (GtkOverlay *overlay,
 GtkWidget  *gtk_overlay_get_relative_widget      (GtkOverlay *overlay);
 
 void        gtk_overlay_add                      (GtkOverlay *overlay,
-                                                  GtkWidget  *widget,
-                                                  gint        x_offset,
-                                                  gint        y_offset);
+                                                  GtkWidget  *widget);
 
 void        gtk_overlay_set_offset               (GtkOverlay *overlay,
                                                   GtkWidget  *widget,
