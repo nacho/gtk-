@@ -678,15 +678,53 @@ gtk_overlay_init (GtkOverlay *overlay)
  * Returns: a new #GtkOverlay object.
  */
 GtkWidget *
-gtk_overlay_new (GtkWidget *main_widget,
-                 GtkWidget *relative_widget)
+gtk_overlay_new (GtkWidget *main_widget)
 {
   g_return_val_if_fail (GTK_IS_WIDGET (main_widget), NULL);
 
   return GTK_WIDGET (g_object_new (GTK_TYPE_OVERLAY,
                                    "main-widget", main_widget,
-                                   "relative-widget", relative_widget,
                                    NULL));
+}
+
+/**
+ * gtk_overlay_set_relative_widget:
+ * @overlay: a #GtkOverlay
+ * @relative_widget: (allow-none): a child of the main widget
+ *
+ * Sets the relative widget where static widgets will be placed. This
+ * widget must be a child of the widget added by gtk_container_add()
+ */
+void
+gtk_overlay_set_relative_widget (GtkOverlay *overlay,
+                                 GtkWidget  *relative_widget)
+{
+  GtkOverlayPrivate *priv;
+
+  g_return_if_fail (GTK_IS_OVERLAY (overlay));
+
+  priv = overlay->priv;
+
+  if (priv->relative_widget != relative_widget)
+    {
+      priv->relative_widget = relative_widget;
+
+      g_object_notify (G_OBJECT (overlay), "relative-widget");
+    }
+}
+
+/**
+ * gtk_overlay_get_relative_widget:
+ * @overlay: a #GtkOverlay
+ *
+ * Gets the relative widget to the main widget added by gtk_container_add()
+ */
+GtkWidget *
+gtk_overlay_get_relative_widget (GtkOverlay *overlay)
+{
+  g_return_val_if_fail (GTK_IS_OVERLAY (overlay), NULL);
+
+  return overlay->priv->relative_widget;
 }
 
 /**

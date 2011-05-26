@@ -38,7 +38,8 @@ do_overlay (GtkWidget *do_widget)
                                       GTK_POLICY_AUTOMATIC);
       gtk_container_add (GTK_CONTAINER (sw), view);
 
-      overlay = gtk_overlay_new (sw, view);
+      overlay = gtk_overlay_new (sw);
+      gtk_overlay_set_relative_widget (GTK_OVERLAY (overlay), view);
       gtk_container_add (GTK_CONTAINER (window), overlay);
 
       entry = gtk_entry_new ();

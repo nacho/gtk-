@@ -66,20 +66,24 @@ struct _GtkOverlayClass
   void (*_gtk_reserved9) (void);
 };
 
-GType       gtk_overlay_get_type    (void) G_GNUC_CONST;
+GType       gtk_overlay_get_type                 (void) G_GNUC_CONST;
 
-GtkWidget  *gtk_overlay_new         (GtkWidget *main_widget,
-                                     GtkWidget *relative_widget);
+GtkWidget  *gtk_overlay_new                      (GtkWidget *main_widget);
 
-void        gtk_overlay_add         (GtkOverlay *overlay,
-                                     GtkWidget  *widget,
-                                     guint       x_offset,
-                                     guint       y_offset);
+void        gtk_overlay_set_relative_widget      (GtkOverlay *overlay,
+                                                  GtkWidget  *relative_widget);
 
-void        gtk_overlay_set_offset  (GtkOverlay *overlay,
-                                     GtkWidget  *widget,
-                                     guint       x_offset,
-                                     guint       y_offset);
+GtkWidget  *gtk_overlay_get_relative_widget      (GtkOverlay *overlay);
+
+void        gtk_overlay_add                      (GtkOverlay *overlay,
+                                                  GtkWidget  *widget,
+                                                  guint       x_offset,
+                                                   guint       y_offset);
+
+void        gtk_overlay_set_offset               (GtkOverlay *overlay,
+                                                  GtkWidget  *widget,
+                                                  guint       x_offset,
+                                                  guint       y_offset);
 
 G_END_DECLS
 
