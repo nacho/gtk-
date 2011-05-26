@@ -1,4 +1,6 @@
 /* Overlay
+ *
+ * Stack widgets in static positions over a main widget
  */
 
 #include <gtk/gtk.h>
@@ -14,6 +16,7 @@ do_overlay (GtkWidget *do_widget)
       GtkWidget *sw;
       GtkWidget *overlay;
       GtkWidget *entry;
+      GtkWidget *label;
 
       window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
       gtk_window_set_screen (GTK_WINDOW (window),
@@ -43,20 +46,40 @@ do_overlay (GtkWidget *do_widget)
       gtk_widget_set_halign (entry, GTK_ALIGN_END);
       gtk_widget_set_valign (entry, GTK_ALIGN_END);
 
+      label = gtk_label_new ("Hello world");
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_END);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, 5);
+
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_START);
       gtk_widget_set_valign (entry, GTK_ALIGN_END);
       gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
+
+      label = gtk_label_new ("Hello world");
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_END);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, 5);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_END);
       gtk_widget_set_valign (entry, GTK_ALIGN_START);
       gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
 
+      label = gtk_label_new ("Hello world");
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_START);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, 5);
+
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_START);
       gtk_widget_set_valign (entry, GTK_ALIGN_START);
       gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
+
+      label = gtk_label_new ("Hello world");
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_START);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, 5);
 
       gtk_widget_show_all (overlay);
     }
