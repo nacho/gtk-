@@ -68,7 +68,7 @@ struct _GtkOverlayClass
 
 GType       gtk_overlay_get_type                 (void) G_GNUC_CONST;
 
-GtkWidget  *gtk_overlay_new                      (GtkWidget *main_widget);
+GtkWidget  *gtk_overlay_new                      (void);
 
 void        gtk_overlay_set_relative_widget      (GtkOverlay *overlay,
                                                   GtkWidget  *relative_widget);

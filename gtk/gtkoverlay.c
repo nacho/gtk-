@@ -47,7 +47,6 @@ struct _GtkOverlayChild
 enum
 {
   PROP_0,
-  PROP_MAIN_WIDGET,
   PROP_RELATIVE_WIDGET
 };
 
@@ -144,9 +143,6 @@ gtk_overlay_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_MAIN_WIDGET:
-      g_value_set_object (value, priv->main_widget);
-      break;
     case PROP_RELATIVE_WIDGET:
       g_value_set_object (value, priv->relative_widget);
       break;
@@ -167,10 +163,6 @@ gtk_overlay_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_MAIN_WIDGET:
-      priv->main_widget = g_value_get_object (value);
-      add_child (overlay, priv->main_widget);
-      break;
     case PROP_RELATIVE_WIDGET:
       priv->relative_widget = g_value_get_object (value);
       break;
@@ -445,10 +437,26 @@ gtk_overlay_draw (GtkWidget *widget,
 }
 
 static void
-overlay_add (GtkContainer *overlay,
+overlay_add (GtkContainer *container,
              GtkWidget    *widget)
 {
-  gtk_overlay_add (GTK_OVERLAY (overlay), widget);
+  GtkOverlay *overlay = GTK_OVERLAY (container);
+  GtkOverlayPrivate *priv = overlay->priv;
+
+  if (priv->main_widget != NULL)
+    {
+      g_warning ("Attempting to add a widget with type %s to a %s, "
+                 "but as a GtkOverlay subclass a %s can only contain one main widget at a time; "
+                 "it already contains a widget of type %s",
+                 g_type_name (G_OBJECT_TYPE (widget)),
+                 g_type_name (G_OBJECT_TYPE (container)),
+                 g_type_name (G_OBJECT_TYPE (container)),
+                 g_type_name (G_OBJECT_TYPE (priv->main_widget)));
+      return;
+    }
+
+  priv->main_widget = widget;
+  add_child (overlay, widget);
 }
 
 static void
@@ -470,6 +478,9 @@ gtk_overlay_remove (GtkContainer *overlay,
               gdk_window_set_user_data (child->window, NULL);
               gdk_window_destroy (child->window);
             }
+
+          if (widget == priv->main_widget)
+            priv->main_widget = NULL;
 
           gtk_widget_unparent (widget);
 
@@ -622,15 +633,6 @@ gtk_overlay_class_init (GtkOverlayClass *klass)
   container_class->set_child_property = gtk_overlay_set_child_property;
   container_class->get_child_property = gtk_overlay_get_child_property;
 
-  g_object_class_install_property (object_class, PROP_MAIN_WIDGET,
-                                   g_param_spec_object ("main-widget",
-                                                        "Main Widget",
-                                                        "The Main Widget",
-                                                        GTK_TYPE_WIDGET,
-                                                        G_PARAM_READWRITE |
-                                                        G_PARAM_CONSTRUCT_ONLY |
-                                                        G_PARAM_STATIC_STRINGS));
-
   g_object_class_install_property (object_class, PROP_RELATIVE_WIDGET,
                                    g_param_spec_object ("relative-widget",
                                                         "Relative Widget",
@@ -668,23 +670,15 @@ gtk_overlay_init (GtkOverlay *overlay)
 
 /**
  * gtk_overlay_new:
- * @main_widget: a #GtkWidget
- * @relative_widget: (allow-none): a #Gtkwidget
  *
- * Creates a new #GtkOverlay. If @relative_widget is not %NULL the floating
- * widgets will be placed in relation to it, if not @main_widget will be use
- * for this purpose.
+ * Creates a new #GtkOverlay.
  *
  * Returns: a new #GtkOverlay object.
  */
 GtkWidget *
-gtk_overlay_new (GtkWidget *main_widget)
+gtk_overlay_new (void)
 {
-  g_return_val_if_fail (GTK_IS_WIDGET (main_widget), NULL);
-
-  return GTK_WIDGET (g_object_new (GTK_TYPE_OVERLAY,
-                                   "main-widget", main_widget,
-                                   NULL));
+  return g_object_new (GTK_TYPE_OVERLAY, NULL);
 }
 
 /**
