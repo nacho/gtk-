@@ -164,8 +164,21 @@ gtk_overlay_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_RELATIVE_WIDGET:
-      priv->relative_widget = g_value_get_object (value);
-      gtk_widget_queue_resize_no_redraw (GTK_WIDGET (overlay));
+      {
+        GtkWidget *relative_widget;
+
+        relative_widget = g_value_get_object (value);
+
+        if (priv->main_widget == NULL ||
+            (relative_widget != NULL &&
+             !gtk_widget_is_ancestor (priv->main_widget, relative_widget)))
+          {
+            g_warning ("relative_widget must be a child of the main widget");
+            break;
+          }
+        priv->relative_widget = relative_widget;
+        gtk_widget_queue_resize_no_redraw (GTK_WIDGET (overlay));
+      }
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
