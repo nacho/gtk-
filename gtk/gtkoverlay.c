@@ -165,6 +165,7 @@ gtk_overlay_set_property (GObject      *object,
     {
     case PROP_RELATIVE_WIDGET:
       priv->relative_widget = g_value_get_object (value);
+      gtk_widget_queue_resize_no_redraw (GTK_WIDGET (overlay));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
