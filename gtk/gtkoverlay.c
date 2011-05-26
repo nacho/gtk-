@@ -409,6 +409,41 @@ gtk_overlay_unmap (GtkWidget *widget)
   GTK_WIDGET_CLASS (gtk_overlay_parent_class)->unmap (widget);
 }
 
+static gboolean
+gtk_overlay_draw (GtkWidget *widget,
+                  cairo_t   *cr)
+{
+  GtkOverlay *overlay = GTK_OVERLAY (widget);
+  GtkOverlayPrivate *priv = overlay->priv;
+  GtkOverlayChild *child;
+  GSList *children;
+
+  for (children = priv->children; children; children = g_slist_next (children))
+    {
+      child = children->data;
+
+      if (child->widget == priv->main_widget)
+        continue;
+
+      if (gtk_cairo_should_draw_window (cr, child->window))
+        {
+          cairo_save (cr);
+          gtk_cairo_transform_to_window (cr, widget, child->window);
+          gtk_render_background (gtk_widget_get_style_context (widget),
+                                 cr,
+                                 0, 0,
+                                 gdk_window_get_width (child->window),
+                                 gdk_window_get_height (child->window));
+          cairo_restore (cr);
+        }
+    }
+
+  /* Chain up to draw children */
+  GTK_WIDGET_CLASS (gtk_overlay_parent_class)->draw (widget, cr);
+  
+  return FALSE;
+}
+
 static void
 overlay_add (GtkContainer *overlay,
              GtkWidget    *widget)
@@ -572,6 +607,7 @@ gtk_overlay_class_init (GtkOverlayClass *klass)
   widget_class->unrealize = gtk_overlay_unrealize;
   widget_class->map = gtk_overlay_map;
   widget_class->unmap = gtk_overlay_unmap;
+  widget_class->draw = gtk_overlay_draw;
 
   container_class->add = overlay_add;
   container_class->remove = gtk_overlay_remove;
