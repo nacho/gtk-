@@ -770,8 +770,8 @@ gtk_overlay_set_offset (GtkOverlay *overlay,
  * gtk_overlay_get_offset:
  * @overlay: a #GtkOverlay
  * @widget: a child of @overlay
- * @x_offset: (out): returns the x offset of @widget
- * @y_offset: (out): returns the y offset of @widget
+ * @x_offset: (out) (allow-none): returns the x offset of @widget
+ * @y_offset: (out) (allow-none): returns the y offset of @widget
  *
  * Gets the offset for @widget
  */
