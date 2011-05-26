@@ -144,15 +144,15 @@ gtk_overlay_get_property (GObject    *object,
 
   switch (prop_id)
     {
-      case PROP_MAIN_WIDGET:
-        g_value_set_object (value, priv->main_widget);
-        break;
-      case PROP_RELATIVE_WIDGET:
-        g_value_set_object (value, priv->relative_widget);
-        break;
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-        break;
+    case PROP_MAIN_WIDGET:
+      g_value_set_object (value, priv->main_widget);
+      break;
+    case PROP_RELATIVE_WIDGET:
+      g_value_set_object (value, priv->relative_widget);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
     }
 }
 
@@ -167,16 +167,16 @@ gtk_overlay_set_property (GObject      *object,
 
   switch (prop_id)
     {
-      case PROP_MAIN_WIDGET:
-        priv->main_widget = g_value_get_object (value);
-        add_child (overlay, priv->main_widget);
-        break;
-      case PROP_RELATIVE_WIDGET:
-        priv->relative_widget = g_value_get_object (value);
-        break;
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-        break;
+    case PROP_MAIN_WIDGET:
+      priv->main_widget = g_value_get_object (value);
+      add_child (overlay, priv->main_widget);
+      break;
+    case PROP_RELATIVE_WIDGET:
+      priv->relative_widget = g_value_get_object (value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
     }
 }
 
@@ -268,45 +268,45 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
       /* FIXME: Add all the positions here */
       switch (halign)
         {
-          case GTK_ALIGN_END:
-            switch (valign)
-              {
-                case GTK_ALIGN_START:
-                  alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - x_offset);
-                  alloc.y = y_offset;
-                  break;
-
-                case GTK_ALIGN_END:
-                  alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - x_offset);
-                  alloc.y = MAX (main_alloc.y, main_alloc.height - req.height - y_offset);
-                  break;
-
-                default:
-                  break;
-              }
+        case GTK_ALIGN_END:
+          switch (valign)
+            {
+            case GTK_ALIGN_START:
+              alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - x_offset);
+              alloc.y = y_offset;
               break;
 
-          case GTK_ALIGN_START:
-            switch (valign)
-              {
-                case GTK_ALIGN_START:
-                  alloc.x = x_offset;
-                  alloc.y = y_offset;
-                  break;
-
-                case GTK_ALIGN_END:
-                  alloc.x = x_offset;
-                  alloc.y = MAX (main_alloc.y, main_alloc.height - req.height - y_offset);
-                  break;
-
-                default:
-                  break;
-              }
+            case GTK_ALIGN_END:
+              alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - x_offset);
+              alloc.y = MAX (main_alloc.y, main_alloc.height - req.height - y_offset);
               break;
 
-          default:
-            alloc.x = 0;
-            alloc.y = 0;
+            default:
+              break;
+            }
+            break;
+
+        case GTK_ALIGN_START:
+          switch (valign)
+            {
+            case GTK_ALIGN_START:
+              alloc.x = x_offset;
+              alloc.y = y_offset;
+              break;
+
+            case GTK_ALIGN_END:
+              alloc.x = x_offset;
+              alloc.y = MAX (main_alloc.y, main_alloc.height - req.height - y_offset);
+              break;
+
+            default:
+              break;
+            }
+            break;
+
+        default:
+          alloc.x = 0;
+          alloc.y = 0;
         }
 
       alloc.width = MIN (main_alloc.width, req.width);
