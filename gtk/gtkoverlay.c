@@ -776,3 +776,31 @@ gtk_overlay_set_offset (GtkOverlay *overlay,
 
   gtk_overlay_set_offset_internal (overlay, get_child (overlay, widget), x_offset, y_offset);
 }
+
+/**
+ * gtk_overlay_get_offset:
+ * @overlay: a #GtkOverlay
+ * @widget: a child of @overlay
+ * @x_offset: (out): returns the x offset of @widget
+ * @y_offset: (out): returns the y offset of @widget
+ *
+ * Gets the offset for @widget
+ */
+void
+gtk_overlay_get_offset (GtkOverlay *overlay,
+                        GtkWidget  *widget,
+                        guint      *x_offset,
+                        guint      *y_offset)
+{
+  GtkOverlayChild *child;
+
+  g_return_if_fail (GTK_IS_OVERLAY (overlay));
+
+  child = get_child (overlay, widget);
+
+  if (x_offset != NULL)
+    *x_offset = child->x_offset;
+
+  if (y_offset != NULL)
+    *y_offset = child->y_offset;
+}

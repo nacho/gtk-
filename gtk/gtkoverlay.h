@@ -85,6 +85,11 @@ void        gtk_overlay_set_offset               (GtkOverlay *overlay,
                                                   guint       x_offset,
                                                   guint       y_offset);
 
+void        gtk_overlay_get_offset               (GtkOverlay *overlay,
+                                                  GtkWidget  *widget,
+                                                  guint      *x_offset,
+                                                  guint      *y_offset);
+
 G_END_DECLS
 
 #endif /* __GTK_OVERLAY_H__ */
