@@ -50,7 +50,7 @@ do_overlay (GtkWidget *do_widget)
       label = gtk_label_new ("Hello world");
       gtk_widget_set_halign (label, GTK_ALIGN_END);
       gtk_widget_set_valign (label, GTK_ALIGN_END);
-      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, 5);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label, -20, -5);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_START);
@@ -60,7 +60,7 @@ do_overlay (GtkWidget *do_widget)
       label = gtk_label_new ("Hello world");
       gtk_widget_set_halign (label, GTK_ALIGN_START);
       gtk_widget_set_valign (label, GTK_ALIGN_END);
-      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, 5);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, -5);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_END);
@@ -70,7 +70,7 @@ do_overlay (GtkWidget *do_widget)
       label = gtk_label_new ("Hello world");
       gtk_widget_set_halign (label, GTK_ALIGN_END);
       gtk_widget_set_valign (label, GTK_ALIGN_START);
-      gtk_overlay_add (GTK_OVERLAY (overlay), label, 20, 5);
+      gtk_overlay_add (GTK_OVERLAY (overlay), label, -20, 5);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_START);

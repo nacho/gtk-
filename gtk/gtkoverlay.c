@@ -272,13 +272,13 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
           switch (valign)
             {
             case GTK_ALIGN_START:
-              alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - x_offset);
+              alloc.x = MAX (main_alloc.x, main_alloc.width - req.width + x_offset);
               alloc.y = y_offset;
               break;
 
             case GTK_ALIGN_END:
-              alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - x_offset);
-              alloc.y = MAX (main_alloc.y, main_alloc.height - req.height - y_offset);
+              alloc.x = MAX (main_alloc.x, main_alloc.width - req.width + x_offset);
+              alloc.y = MAX (main_alloc.y, main_alloc.height - req.height + y_offset);
               break;
 
             default:
@@ -296,7 +296,7 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
 
             case GTK_ALIGN_END:
               alloc.x = x_offset;
-              alloc.y = MAX (main_alloc.y, main_alloc.height - req.height - y_offset);
+              alloc.y = MAX (main_alloc.y, main_alloc.height - req.height + y_offset);
               break;
 
             default:
@@ -739,8 +739,8 @@ gtk_overlay_get_relative_widget (GtkOverlay *overlay)
 void
 gtk_overlay_add (GtkOverlay *overlay,
                  GtkWidget  *widget,
-                 guint       x_offset,
-                 guint       y_offset)
+                 gint        x_offset,
+                 gint        y_offset)
 {
   GtkOverlayChild *child;
 
@@ -769,8 +769,8 @@ gtk_overlay_add (GtkOverlay *overlay,
 void
 gtk_overlay_set_offset (GtkOverlay *overlay,
                         GtkWidget  *widget,
-                        guint       x_offset,
-                        guint       y_offset)
+                        gint        x_offset,
+                        gint        y_offset)
 {
   g_return_if_fail (GTK_IS_OVERLAY (overlay));
 
@@ -789,8 +789,8 @@ gtk_overlay_set_offset (GtkOverlay *overlay,
 void
 gtk_overlay_get_offset (GtkOverlay *overlay,
                         GtkWidget  *widget,
-                        guint      *x_offset,
-                        guint      *y_offset)
+                        gint       *x_offset,
+                        gint       *y_offset)
 {
   GtkOverlayChild *child;
 
