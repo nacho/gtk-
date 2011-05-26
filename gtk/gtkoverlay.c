@@ -465,6 +465,12 @@ gtk_overlay_remove (GtkContainer *overlay,
 
       if (child->widget == widget)
         {
+          if (child->window != NULL && child->widget != priv->main_widget)
+            {
+              gdk_window_set_user_data (child->window, NULL);
+              gdk_window_destroy (child->window);
+            }
+
           gtk_widget_unparent (widget);
 
           priv->children = g_slist_delete_link (priv->children,
