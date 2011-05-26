@@ -71,9 +71,15 @@ GType       gtk_overlay_get_type    (void) G_GNUC_CONST;
 GtkWidget  *gtk_overlay_new         (GtkWidget *main_widget,
                                      GtkWidget *relative_widget);
 
-void        gtk_overlay_add         (GtkOverlay             *overlay,
-                                     GtkWidget              *widget,
-                                     guint                   offset);
+void        gtk_overlay_add         (GtkOverlay *overlay,
+                                     GtkWidget  *widget,
+                                     guint       x_offset,
+                                     guint       y_offset);
+
+void        gtk_overlay_set_offset  (GtkOverlay *overlay,
+                                     GtkWidget  *widget,
+                                     guint       x_offset,
+                                     guint       y_offset);
 
 G_END_DECLS
 

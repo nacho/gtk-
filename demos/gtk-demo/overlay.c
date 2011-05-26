@@ -39,24 +39,24 @@ do_overlay (GtkWidget *do_widget)
       gtk_container_add (GTK_CONTAINER (window), overlay);
 
       entry = gtk_entry_new ();
-      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0);
+      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
       gtk_widget_set_halign (entry, GTK_ALIGN_END);
       gtk_widget_set_valign (entry, GTK_ALIGN_END);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_START);
       gtk_widget_set_valign (entry, GTK_ALIGN_END);
-      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0);
+      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_END);
       gtk_widget_set_valign (entry, GTK_ALIGN_START);
-      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0);
+      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
 
       entry = gtk_entry_new ();
       gtk_widget_set_halign (entry, GTK_ALIGN_START);
       gtk_widget_set_valign (entry, GTK_ALIGN_START);
-      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0);
+      gtk_overlay_add (GTK_OVERLAY (overlay), entry, 0, 0);
 
       gtk_widget_show_all (overlay);
     }

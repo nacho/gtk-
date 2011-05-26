@@ -40,7 +40,8 @@ struct _GtkOverlayChild
 {
   GtkWidget *widget;
   GdkWindow *window;
-  gint offset;
+  gint x_offset;
+  gint y_offset;
 };
 
 enum
@@ -53,7 +54,8 @@ enum
 enum
 {
   CHILD_PROP_0,
-  CHILD_PROP_OFFSET
+  CHILD_PROP_X_OFFSET,
+  CHILD_PROP_Y_OFFSET
 };
 
 G_DEFINE_TYPE (GtkOverlay, gtk_overlay, GTK_TYPE_CONTAINER)
@@ -248,7 +250,7 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
     {
       GtkRequisition req;
       GtkAllocation alloc, child_alloc;
-      guint offset;
+      guint x_offset, y_offset;
       GtkAlign halign, valign;
 
       child = children->data;
@@ -260,7 +262,8 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
       gtk_widget_get_preferred_size (child->widget, NULL, &req);
       halign = gtk_widget_get_halign (child->widget);
       valign = gtk_widget_get_valign (child->widget);
-      offset = child->offset;
+      x_offset = child->x_offset;
+      y_offset = child->y_offset;
 
       /* FIXME: Add all the positions here */
       switch (halign)
@@ -269,13 +272,13 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
             switch (valign)
               {
                 case GTK_ALIGN_START:
-                  alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - (gint) offset);
-                  alloc.y = 0;
+                  alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - x_offset);
+                  alloc.y = y_offset;
                   break;
 
                 case GTK_ALIGN_END:
-                  alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - (gint) offset);
-                  alloc.y = MAX (main_alloc.y, main_alloc.height - req.height);
+                  alloc.x = MAX (main_alloc.x, main_alloc.width - req.width - x_offset);
+                  alloc.y = MAX (main_alloc.y, main_alloc.height - req.height - y_offset);
                   break;
 
                 default:
@@ -287,13 +290,13 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
             switch (valign)
               {
                 case GTK_ALIGN_START:
-                  alloc.x = offset;
-                  alloc.y = 0;
+                  alloc.x = x_offset;
+                  alloc.y = y_offset;
                   break;
 
                 case GTK_ALIGN_END:
-                  alloc.x = offset;
-                  alloc.y = MAX (main_alloc.y, main_alloc.height - req.height);
+                  alloc.x = x_offset;
+                  alloc.y = MAX (main_alloc.y, main_alloc.height - req.height - y_offset);
                   break;
 
                 default:
@@ -410,7 +413,7 @@ static void
 overlay_add (GtkContainer *overlay,
              GtkWidget    *widget)
 {
-  gtk_overlay_add (GTK_OVERLAY (overlay), widget, 0);
+  gtk_overlay_add (GTK_OVERLAY (overlay), widget, 0, 0);
 }
 
 static void
@@ -468,16 +471,23 @@ gtk_overlay_child_type (GtkContainer *overlay)
 static void
 gtk_overlay_set_offset_internal (GtkOverlay      *overlay,
                                  GtkOverlayChild *child,
-                                 gint             offset)
+                                 gint             x_offset,
+                                 gint             y_offset)
 {
   g_return_if_fail (gtk_widget_get_parent (child->widget) == GTK_WIDGET (overlay));
 
   gtk_widget_freeze_child_notify (child->widget);
 
-  if (child->offset != offset)
+  if (child->x_offset != x_offset)
     {
-      child->offset = offset;
-      gtk_widget_child_notify (child->widget, "offset");
+      child->x_offset = x_offset;
+      gtk_widget_child_notify (child->widget, "x-offset");
+    }
+
+  if (child->y_offset != y_offset)
+    {
+      child->y_offset = y_offset;
+      gtk_widget_child_notify (child->widget, "y-offset");
     }
 
   gtk_widget_thaw_child_notify (child->widget);
@@ -501,9 +511,16 @@ gtk_overlay_set_child_property (GtkContainer *container,
 
   switch (property_id)
     {
-    case CHILD_PROP_OFFSET:
+    case CHILD_PROP_X_OFFSET:
       gtk_overlay_set_offset_internal (overlay,
                                        overlay_child,
+                                       g_value_get_int (value),
+                                       overlay_child->y_offset);
+      break;
+    case CHILD_PROP_Y_OFFSET:
+      gtk_overlay_set_offset_internal (overlay,
+                                       overlay_child,
+                                       overlay_child->x_offset,
                                        g_value_get_int (value));
       break;
     default:
@@ -525,8 +542,11 @@ gtk_overlay_get_child_property (GtkContainer *container,
 
   switch (property_id)
     {
-    case CHILD_PROP_OFFSET:
-      g_value_set_int (value, overlay_child->offset);
+    case CHILD_PROP_X_OFFSET:
+      g_value_set_int (value, overlay_child->x_offset);
+      break;
+    case CHILD_PROP_Y_OFFSET:
+      g_value_set_int (value, overlay_child->y_offset);
       break;
     default:
       GTK_CONTAINER_WARN_INVALID_CHILD_PROPERTY_ID (container, property_id, pspec);
@@ -578,10 +598,18 @@ gtk_overlay_class_init (GtkOverlayClass *klass)
                                                         G_PARAM_STATIC_STRINGS));
 
   gtk_container_class_install_child_property (container_class,
-                                              CHILD_PROP_OFFSET,
-                                              g_param_spec_int ("offset",
-                                                                P_("Offset"),
-                                                                P_("The offset of child widget"),
+                                              CHILD_PROP_X_OFFSET,
+                                              g_param_spec_int ("x-offset",
+                                                                P_("X Offset"),
+                                                                P_("The x offset of child widget"),
+                                                                G_MININT, G_MAXINT, 0,
+                                                                GTK_PARAM_READWRITE));
+
+  gtk_container_class_install_child_property (container_class,
+                                              CHILD_PROP_Y_OFFSET,
+                                              g_param_spec_int ("y-offset",
+                                                                P_("Y Offset"),
+                                                                P_("The y offset of child widget"),
                                                                 G_MININT, G_MAXINT, 0,
                                                                 GTK_PARAM_READWRITE));
 
@@ -623,14 +651,16 @@ gtk_overlay_new (GtkWidget *main_widget,
  * gtk_overlay_add:
  * @overlay: a #GtkOverlay
  * @widget: a #GtkWidget to be added to the container
- * @offset: offset for @widget
+ * @x_offset: x offset for @widget
+ * @y_offset: y offset for @widget
  *
  * Adds @widget to @overlay in a specific position.
  */
 void
 gtk_overlay_add (GtkOverlay *overlay,
                  GtkWidget  *widget,
-                 guint       offset)
+                 guint       x_offset,
+                 guint       y_offset)
 {
   GtkOverlayChild *child;
 
@@ -640,18 +670,29 @@ gtk_overlay_add (GtkOverlay *overlay,
   add_child (overlay, widget);
 
   child = get_child (overlay, widget);
-  child->offset = offset;
+  child->x_offset = x_offset;
+  child->y_offset = y_offset;
 
   if (gtk_widget_get_realized (GTK_WIDGET (overlay)))
     child->window = gtk_overlay_create_child_window (overlay, widget);
 }
 
+/**
+ * gtk_overlay_set_offset:
+ * @overlay: a #GtkOverlay
+ * @widget: a child of @overlay
+ * @x_offset: the new x offset for @widget
+ * @y_offset: the new y offset for @widget
+ *
+ * Sets the offset for @widget
+ */
 void
 gtk_overlay_set_offset (GtkOverlay *overlay,
                         GtkWidget  *widget,
-                        gint        offset)
+                        guint       x_offset,
+                        guint       y_offset)
 {
   g_return_if_fail (GTK_IS_OVERLAY (overlay));
 
-  gtk_overlay_set_offset_internal (overlay, get_child (overlay, widget), offset);
+  gtk_overlay_set_offset_internal (overlay, get_child (overlay, widget), x_offset, y_offset);
 }
