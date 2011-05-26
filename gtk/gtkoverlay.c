@@ -34,6 +34,15 @@ struct _GtkOverlayPrivate
   GSList    *children;
 };
 
+typedef struct _GtkOverlayChild GtkOverlayChild;
+
+struct _GtkOverlayChild
+{
+  GtkWidget *widget;
+  GdkWindow *window;
+  gint offset;
+};
+
 enum
 {
   PROP_0,
