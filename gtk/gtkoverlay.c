@@ -290,6 +290,11 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
               alloc.y = MAX (main_alloc.y, main_alloc.height - req.height + y_offset);
               break;
 
+            case GTK_ALIGN_CENTER:
+              alloc.x = MAX (main_alloc.x, main_alloc.width - req.width + x_offset);
+              alloc.y = MAX (main_alloc.y, main_alloc.height / 2 - req.height / 2 + y_offset);
+              break;
+
             default:
               break;
             }
@@ -306,6 +311,34 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
             case GTK_ALIGN_END:
               alloc.x = x_offset;
               alloc.y = MAX (main_alloc.y, main_alloc.height - req.height + y_offset);
+              break;
+
+            case GTK_ALIGN_CENTER:
+              alloc.x = x_offset;
+              alloc.y = MAX (main_alloc.y, main_alloc.height / 2 - req.height / 2 + y_offset);
+              break;
+
+            default:
+              break;
+            }
+            break;
+
+        case GTK_ALIGN_CENTER:
+          switch (valign)
+            {
+            case GTK_ALIGN_START:
+              alloc.x = MAX (main_alloc.x, main_alloc.width / 2 - req.width / 2 + x_offset);
+              alloc.y = y_offset;
+              break;
+
+            case GTK_ALIGN_END:
+              alloc.x = MAX (main_alloc.x, main_alloc.width / 2 - req.width / 2 + x_offset);
+              alloc.y = MAX (main_alloc.y, main_alloc.height - req.height + y_offset);
+              break;
+
+            case GTK_ALIGN_CENTER:
+              alloc.x = MAX (main_alloc.x, main_alloc.width / 2 - req.width / 2 + x_offset);
+              alloc.y = MAX (main_alloc.y, main_alloc.height / 2 - req.height / 2 + y_offset);
               break;
 
             default:
