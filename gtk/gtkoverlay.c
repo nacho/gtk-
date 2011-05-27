@@ -240,6 +240,9 @@ gtk_overlay_size_allocate (GtkWidget     *widget,
 
   GTK_WIDGET_CLASS (gtk_overlay_parent_class)->size_allocate (widget, allocation);
 
+  if (priv->main_widget == NULL)
+    return;
+
   /* main widget allocation */
   main_alloc.x = 0;
   main_alloc.y = 0;
