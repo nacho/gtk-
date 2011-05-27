@@ -474,6 +474,19 @@ overlay_add (GtkContainer *container,
 
   priv->main_widget = widget;
   add_child (overlay, widget);
+
+  /* if we have a previously added relative widget we must check that it is
+     still valid */
+  if (priv->relative_widget != NULL &&
+      !gtk_widget_is_ancestor (priv->relative_widget, priv->main_widget))
+    {
+      g_warning ("The previously relative widget with type %s is not compatible "
+                 "with the new main widget added %s, the relative widget will "
+                 "be unset before continue",
+                 g_type_name (G_OBJECT_TYPE (priv->relative_widget)),
+                 g_type_name (G_OBJECT_TYPE (widget)));
+      gtk_overlay_set_relative_widget (overlay, NULL);
+    }
 }
 
 static void
