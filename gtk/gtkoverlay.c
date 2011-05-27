@@ -177,7 +177,7 @@ gtk_overlay_set_property (GObject      *object,
             break;
           }
         priv->relative_widget = relative_widget;
-        gtk_widget_queue_resize_no_redraw (GTK_WIDGET (overlay));
+        gtk_widget_queue_resize (GTK_WIDGET (overlay));
       }
       break;
     default:
