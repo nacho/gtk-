@@ -696,6 +696,14 @@ gtk_overlay_class_init (GtkOverlayClass *klass)
   container_class->set_child_property = gtk_overlay_set_child_property;
   container_class->get_child_property = gtk_overlay_get_child_property;
 
+  /**
+   * GtkOverlay:relative-widget
+   *
+   * Widget where the floating widgets will be placed. This widget must be
+   * a child of the main widget added to #GtkOverlay
+   *
+   * Since: 3.2
+   */
   g_object_class_install_property (object_class, PROP_RELATIVE_WIDGET,
                                    g_param_spec_object ("relative-widget",
                                                         "Relative Widget",
@@ -737,6 +745,8 @@ gtk_overlay_init (GtkOverlay *overlay)
  * Creates a new #GtkOverlay.
  *
  * Returns: a new #GtkOverlay object.
+ *
+ * Since: 3.2
  */
 GtkWidget *
 gtk_overlay_new (void)
@@ -751,6 +761,8 @@ gtk_overlay_new (void)
  *
  * Sets the relative widget where static widgets will be placed. This
  * widget must be a child of the widget added by gtk_container_add()
+ *
+ * Since: 3.2
  */
 void
 gtk_overlay_set_relative_widget (GtkOverlay *overlay,
@@ -775,6 +787,8 @@ gtk_overlay_set_relative_widget (GtkOverlay *overlay,
  * @overlay: a #GtkOverlay
  *
  * Gets the relative widget to the main widget added by gtk_container_add()
+ *
+ * Since: 3.2
  */
 GtkWidget *
 gtk_overlay_get_relative_widget (GtkOverlay *overlay)
@@ -790,6 +804,8 @@ gtk_overlay_get_relative_widget (GtkOverlay *overlay)
  * @widget: a #GtkWidget to be added to the container
  *
  * Adds @widget to @overlay.
+ *
+ * Since: 3.2
  */
 void
 gtk_overlay_add (GtkOverlay *overlay,
@@ -816,6 +832,8 @@ gtk_overlay_add (GtkOverlay *overlay,
  * @y_offset: the new y offset for @widget
  *
  * Sets the offset for @widget
+ *
+ * Since: 3.2
  */
 void
 gtk_overlay_set_offset (GtkOverlay *overlay,
@@ -836,6 +854,8 @@ gtk_overlay_set_offset (GtkOverlay *overlay,
  * @y_offset: (out) (allow-none): returns the y offset of @widget
  *
  * Gets the offset for @widget
+ *
+ * Since: 3.2
  */
 void
 gtk_overlay_get_offset (GtkOverlay *overlay,
